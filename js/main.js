@@ -29,6 +29,9 @@ camera.position.set(0, 1.7, 16); // Mulai di dekat pintu masuk
 // ══════════════════════════════════════════════
 //  CONTROLS
 // ══════════════════════════════════════════════
+const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+              || ('ontouchstart' in window);
+
 const controls = new THREE.PointerLockControls(camera, renderer.domElement);
 scene.add(controls.getObject());
 
@@ -36,10 +39,12 @@ const keys = {};
 document.addEventListener('keydown', e => { keys[e.code] = true; });
 document.addEventListener('keyup',   e => { keys[e.code] = false; });
 
-// Klik canvas → lock pointer
-renderer.domElement.addEventListener('click', () => {
-  if (!controls.isLocked) controls.lock();
-});
+// Klik canvas → lock pointer (desktop only)
+if (!isMobile) {
+  renderer.domElement.addEventListener('click', () => {
+    if (!controls.isLocked) controls.lock();
+  });
+}
 
 controls.addEventListener('unlock', () => {
   // Sembunyikan info panel saat pointer unlock (ESC)
@@ -156,17 +161,11 @@ infoClose.onclick = () => hideInfoPanel();
 //  KEYBOARD – Tekan E untuk interaksi
 // ══════════════════════════════════════════════
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyE' && currentNearObj && controls.isLocked) {
+  if (e.code === 'KeyE' && currentNearObj && (controls.isLocked || isMobile)) {
     const data = currentNearObj.userData.data;
-    if (data) {
-      showInfoPanel(data);
-    }
+    if (data) showInfoPanel(data);
   }
-
-  // ESC – tutup panel
-  if (e.code === 'Escape' && infoPanelOpen) {
-    hideInfoPanel();
-  }
+  if (e.code === 'Escape' && infoPanelOpen) hideInfoPanel();
 });
 
 // ════════════════════════════════════════════
@@ -272,6 +271,11 @@ const velocity = new THREE.Vector3();
 const clock    = new THREE.Clock();
 
 function handleMovement(delta) {
+  if (isMobile) {
+    if (window._mobileMove) window._mobileMove(delta);
+    else clampPosition();
+    return;
+  }
   if (!controls.isLocked) return;
 
   const speed  = walkSpeed * delta;
@@ -316,6 +320,121 @@ function animate() {
   if (_nearbyTick >= 4) { detectNearby(); _nearbyTick = 0; }
 
   renderer.render(scene, camera);
+}
+
+// ══════════════════════════════════════════════
+//  DETEKSI MOBILE & KONTROL SENTUH
+// ══════════════════════════════════════════════
+if (isMobile) {
+  // Tampilkan kontrol mobile, sembunyikan crosshair & hint keyboard
+  document.getElementById('mobile-controls').classList.remove('hidden');
+  document.getElementById('crosshair').style.display = 'none';
+
+  // ── Joystick Virtual ──────────────────────
+  const joystickZone  = document.getElementById('joystick-zone');
+  const joystickThumb = document.getElementById('joystick-thumb');
+  const joyBase       = document.getElementById('joystick-base');
+
+  const joy = { active: false, id: null, startX: 0, startY: 0, dx: 0, dy: 0 };
+  const JOY_RADIUS = 39; // px — radius maks thumb dari tengah
+
+  joystickZone.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.changedTouches[0];
+    joy.active = true;
+    joy.id     = t.identifier;
+    const rect = joyBase.getBoundingClientRect();
+    joy.startX = rect.left + rect.width  / 2;
+    joy.startY = rect.top  + rect.height / 2;
+  }, { passive: false });
+
+  document.addEventListener('touchmove', e => {
+    if (!joy.active) return;
+    for (const t of e.changedTouches) {
+      if (t.identifier !== joy.id) continue;
+      let dx = t.clientX - joy.startX;
+      let dy = t.clientY - joy.startY;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      if (len > JOY_RADIUS) { dx = dx / len * JOY_RADIUS; dy = dy / len * JOY_RADIUS; }
+      joy.dx = dx; joy.dy = dy;
+      joystickThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    }
+  }, { passive: true });
+
+  const resetJoy = () => {
+    joy.active = false; joy.dx = 0; joy.dy = 0;
+    joystickThumb.style.transform = 'translate(-50%, -50%)';
+  };
+  document.addEventListener('touchend',    e => { for (const t of e.changedTouches) if (t.identifier === joy.id) resetJoy(); });
+  document.addEventListener('touchcancel', e => { for (const t of e.changedTouches) if (t.identifier === joy.id) resetJoy(); });
+
+  // ── Look (Swipe sisi kanan layar) ─────────
+  const look = { active: false, id: null, lastX: 0, lastY: 0 };
+  const LOOK_SENS = 0.004;
+
+  renderer.domElement.addEventListener('touchstart', e => {
+    e.preventDefault();
+    for (const t of e.changedTouches) {
+      // Hanya tangani sentuhan di sisi kanan (bukan area joystick)
+      if (t.clientX > window.innerWidth * 0.35 && !look.active) {
+        look.active = true;
+        look.id     = t.identifier;
+        look.lastX  = t.clientX;
+        look.lastY  = t.clientY;
+      }
+    }
+  }, { passive: false });
+
+  renderer.domElement.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!look.active) return;
+    for (const t of e.changedTouches) {
+      if (t.identifier !== look.id) continue;
+      const dx = t.clientX - look.lastX;
+      const dy = t.clientY - look.lastY;
+      look.lastX = t.clientX;
+      look.lastY = t.clientY;
+
+      // Putar kamera langsung lewat euler
+      const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+      euler.setFromQuaternion(camera.quaternion);
+      euler.y -= dx * LOOK_SENS;
+      euler.x -= dy * LOOK_SENS;
+      euler.x  = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, euler.x));
+      camera.quaternion.setFromEuler(euler);
+    }
+  }, { passive: false });
+
+  const resetLook = e => { for (const t of e.changedTouches) if (t.identifier === look.id) look.active = false; };
+  renderer.domElement.addEventListener('touchend',    resetLook, { passive: true });
+  renderer.domElement.addEventListener('touchcancel', resetLook, { passive: true });
+
+  // ── Tombol Interaksi ──────────────────────
+  document.getElementById('btn-interact').addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (currentNearObj && currentNearObj.userData.data) {
+      showInfoPanel(currentNearObj.userData.data);
+    }
+  }, { passive: false });
+
+  // ── Override handleMovement untuk joystick ─
+  // Simpan referensi fungsi gerak mobile, dipanggil dari animate()
+  window._mobileMove = function(delta) {
+    if (!joy.active || (joy.dx === 0 && joy.dy === 0)) {
+      clampPosition(); return;
+    }
+    const JOY_MAX = JOY_RADIUS;
+    const speed   = walkSpeed * delta;
+    controls.moveForward(-(joy.dy / JOY_MAX) * speed);
+    controls.moveRight(   (joy.dx / JOY_MAX) * speed);
+    clampPosition();
+  };
+
+  // ── Hint bar → ganti teks untuk HP ────────
+  document.getElementById('hint-text').innerHTML = '👁️ Tap tombol kanan untuk info';
+
+  // ── detectNearby di mobile tetap berjalan ─
+  // (tidak butuh isLocked karena HP tidak pakai pointer lock)
 }
 
 // ── Start ─────────────────────────────────────

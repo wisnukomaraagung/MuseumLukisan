@@ -52,7 +52,19 @@
 
     <!-- Interaction Hint -->
     <div id="hint-bar" class="hidden">
-      <span>🔍 Tekan <kbd>E</kbd> untuk melihat informasi</span>
+      <span id="hint-text">🔍 Tekan <kbd>E</kbd> untuk melihat informasi</span>
+    </div>
+
+    <!-- Kontrol Mobile (hanya muncul di HP) -->
+    <div id="mobile-controls" class="hidden">
+      <!-- Joystick kiri: gerak -->
+      <div id="joystick-zone">
+        <div id="joystick-base">
+          <div id="joystick-thumb"></div>
+        </div>
+      </div>
+      <!-- Tombol interaksi kanan bawah -->
+      <button id="btn-interact">👁️</button>
     </div>
 
   <!-- Three.js -->

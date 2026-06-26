@@ -139,3 +139,69 @@ canvas { display: block; }
   0%,100% { transform: scale(1); }
   50%      { transform: scale(1.15); }
 }
+
+/* ── Mobile Controls ──────────────────────── */
+#mobile-controls {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 200;
+}
+#mobile-controls.hidden { display: none; }
+
+/* Zona joystick kiri bawah */
+#joystick-zone {
+  position: absolute;
+  bottom: 40px; left: 40px;
+  width: 130px; height: 130px;
+  pointer-events: all;
+}
+
+#joystick-base {
+  width: 130px; height: 130px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.45);
+  border: 2px solid rgba(201,168,76,.5);
+  position: relative;
+}
+
+#joystick-thumb {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(201,168,76,.75);
+  border: 2px solid #c9a84c;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  transition: background .1s;
+}
+
+/* Tombol interaksi kanan bawah */
+#btn-interact {
+  position: absolute;
+  bottom: 50px; right: 40px;
+  width: 70px; height: 70px;
+  border-radius: 50%;
+  background: rgba(124,79,30,.8);
+  border: 2px solid var(--gold);
+  color: #fff; font-size: 1.8rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; pointer-events: all;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s, transform .1s;
+}
+#btn-interact:active {
+  background: rgba(201,168,76,.9);
+  transform: scale(0.93);
+}
+
+/* Info panel lebih lebar di HP */
+@media (max-width: 600px) {
+  #info-panel {
+    bottom: 0; right: 0; left: 0;
+    width: 100%; max-height: 55vh;
+    border-radius: 16px 16px 0 0;
+    padding: 16px 18px;
+  }
+  #hud-title { font-size: .85rem; padding: 5px 14px; top: 10px; }
+  #crosshair { display: none; }
+}
