@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Museum Sejarah Nusantara – Virtual 3D</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Warning: file:// protocol -->
+  <div id="file-protocol-warning" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9999;
+    background:#8B0000; color:#fff; padding:10px 16px; font-size:14px; text-align:center; font-family:sans-serif;">
+    ⚠️ <strong>Tekstur tidak akan muncul!</strong> Buka via HTTP server, bukan klik langsung file HTML.
+    Gunakan: <code style="background:#333;padding:2px 6px;border-radius:3px">python -m http.server 8080</code>
+    lalu buka <code style="background:#333;padding:2px 6px;border-radius:3px">http://localhost:8080</code>
+    &nbsp;|&nbsp; Atau pakai ekstensi <strong>Live Server</strong> di VS Code.
+  </div>
+  <script>
+    if (window.location.protocol === 'file:') {
+      document.getElementById('file-protocol-warning').style.display = 'block';
+    }
+  </script>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loader-wrap">
+      <div class="loader-logo">🏛️</div>
+      <h2>Museum Sejarah Nusantara</h2>
+      <p>Memuat aset museum...</p>
+      <div class="loader-bar"><div id="loader-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- HUD / GUI Overlay -->
+  <div id="hud">
+    <div id="hud-title">🏛️ Museum Sejarah Nusantara</div>
+
+    <!-- Info Panel (muncul saat dekat benda) -->
+    <div id="info-panel" class="hidden">
+      <button id="info-close">✕</button>
+      <div id="info-icon">🏺</div>
+      <h2 id="info-title">Nama Artefak</h2>
+      <p id="info-era">Era: –</p>
+      <p id="info-origin">Asal: –</p>
+      <div class="divider"></div>
+      <p id="info-desc">Deskripsi artefak...</p>
+    </div>
+
+    <!-- Crosshair -->
+    <div id="crosshair">+</div>
+
+    <!-- Interaction Hint -->
+    <div id="hint-bar" class="hidden">
+      <span>🔍 Tekan <kbd>E</kbd> untuk melihat informasi</span>
+    </div>
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- GLTFLoader untuk model .glb -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <!-- DRACOLoader untuk dekompresi model .glb yang sudah dikompresi draco -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+  <!-- MeshoptDecoder untuk dekompresi model .glb yang sudah dikompresi meshopt -->
+  <script src="https://cdn.jsdelivr.net/npm/meshoptimizer/meshopt_decoder.js"></script>
+  <!-- PointerLockControls via CDN tidak tersedia di r128 CDN, kita load manual -->
+  <script src="js/PointerLockControls.js"></script>
+  <script src="js/ArtifactData.js"></script>
+  <script src="js/Museum.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+/* =============================================
+   Museum Sejarah Nusantara – Style
+   ============================================= */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold:   #c9a84c;
+  --dark:   #0d0a07;
+  --panel:  rgba(10, 8, 5, 0.88);
+  --accent: #7c4f1e;
+  --text:   #f0e6d0;
+  --sub:    #a89070;
+  --radius: 8px;
+  --font-display: 'Georgia', serif;
+  --font-body:    'Segoe UI', sans-serif;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--dark);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+canvas { display: block; }
+
+/* ── Loading Screen ───────────────────────── */
+#loading-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--dark);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.6s ease;
+}
+#loading-screen.fade-out { opacity: 0; pointer-events: none; }
+
+.loader-wrap { text-align: center; }
+.loader-logo { font-size: 4rem; margin-bottom: 1rem; animation: pulse 2s infinite; }
+.loader-wrap h2 {
+  font-family: var(--font-display);
+  font-size: 1.8rem; color: var(--gold);
+  margin-bottom: .4rem;
+}
+.loader-wrap p { color: var(--sub); margin-bottom: 1.2rem; }
+.loader-bar {
+  width: 260px; height: 6px;
+  background: #2a2010; border-radius: 3px; overflow: hidden;
+  margin: 0 auto;
+}
+#loader-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* ── HUD ──────────────────────────────────── */
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+
+#hud-title {
+  position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: 1.1rem; color: var(--gold);
+  background: var(--panel);
+  padding: 6px 20px; border-radius: 20px;
+  border: 1px solid rgba(201,168,76,.3);
+  letter-spacing: .05em;
+}
+
+/* ── Info Panel ───────────────────────────── */
+.divider {
+  border: none; border-top: 1px solid rgba(201,168,76,.15);
+  margin: 10px 0;
+}
+#info-panel {
+  position: absolute; bottom: 20px; right: 20px;
+  background: var(--panel);
+  border: 1px solid rgba(201,168,76,.4);
+  border-radius: 12px;
+  padding: 20px 24px; width: min(340px, 38vw);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  pointer-events: all;
+  backdrop-filter: blur(6px);
+  transition: opacity .3s, transform .3s;
+}
+#info-panel.hidden { opacity: 0; pointer-events: none; transform: translateY(12px); }
+
+#info-close {
+  position: absolute; top: 10px; right: 14px;
+  background: none; border: none;
+  color: var(--sub); font-size: 1.1rem;
+  cursor: pointer; line-height: 1;
+}
+#info-close:hover { color: var(--gold); }
+
+#info-icon { font-size: 2.2rem; margin-bottom: 6px; }
+#info-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem; color: var(--gold);
+  margin-bottom: 4px;
+}
+#info-era, #info-origin { font-size: .8rem; color: var(--sub); margin-bottom: 2px; }
+#info-desc { font-size: .9rem; line-height: 1.6; color: var(--text); }
+
+/* ── Crosshair ────────────────────────────── */
+#crosshair {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.4rem; color: rgba(255,255,255,.6);
+  line-height: 1; user-select: none;
+}
+
+/* ── Hint Bar ─────────────────────────────── */
+#hint-bar {
+  position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,.7);
+  border: 1px solid var(--gold);
+  border-radius: 20px; padding: 6px 18px;
+  font-size: .85rem; color: var(--gold);
+  transition: opacity .3s;
+}
+#hint-bar.hidden { opacity: 0; }
+#hint-bar kbd {
+  background: var(--accent); color: #fff;
+  padding: 1px 6px; border-radius: 4px; font-family: monospace;
+}
+
+/* ── Controls Help ────────────────────────── */
+#controls-help {
+  position: absolute; bottom: 16px; right: 16px;
+  font-size: .72rem; color: rgba(160,140,110,.6);
+  text-align: right; line-height: 1.8;
+}
+
+/* ── Animations ───────────────────────────── */
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.15); }
+}
