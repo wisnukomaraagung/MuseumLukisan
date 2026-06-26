@@ -30,16 +30,20 @@ camera.position.set(0, 1.7, 16); // Mulai di dekat pintu masuk
 //  CONTROLS
 // ══════════════════════════════════════════════
 const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
-              || ('ontouchstart' in window);
+              || ('ontouchstart' in window)
+              || (navigator.maxTouchPoints > 0)
+              || window.innerWidth <= 900;
 
 // Blokir zoom pinch & scroll browser di seluruh halaman saat di mobile
 if (isMobile) {
   document.addEventListener('gesturestart',  e => e.preventDefault(), { passive: false });
   document.addEventListener('gesturechange', e => e.preventDefault(), { passive: false });
   document.addEventListener('gestureend',    e => e.preventDefault(), { passive: false });
-  // Blokir touchmove multi-finger di body (pinch zoom)
+  
+  // Blokir SEMUA scroll dan zoom native, kecuali jika sedang scroll info-panel
   document.addEventListener('touchmove', e => {
-    if (e.touches.length > 1) e.preventDefault();
+    if (e.target.closest('#info-panel')) return; // Izinkan scroll di dalam panel info
+    e.preventDefault();
   }, { passive: false });
 }
 
@@ -388,8 +392,8 @@ if (isMobile) {
   renderer.domElement.addEventListener('touchstart', e => {
     e.preventDefault();
     for (const t of e.changedTouches) {
-      // Hanya tangani sentuhan di sisi kanan (bukan area joystick)
-      if (t.clientX > window.innerWidth * 0.35 && !look.active) {
+      // Tangani sentuhan di mana saja di canvas untuk melihat sekeliling
+      if (!look.active) {
         look.active = true;
         look.id     = t.identifier;
         look.lastX  = t.clientX;
