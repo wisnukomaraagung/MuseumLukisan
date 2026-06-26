@@ -33,6 +33,8 @@ const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
               || ('ontouchstart' in window);
 
 const controls = new THREE.PointerLockControls(camera, renderer.domElement);
+// Di mobile, jangan connect pointer lock sama sekali agar browser tidak memblokir
+if (isMobile) controls.disconnect();
 scene.add(controls.getObject());
 
 const keys = {};
@@ -143,8 +145,8 @@ function showInfoPanel(data) {
   infoPanelOpen = true;
   infoPanelData = data;
 
-  // Unlock pointer agar bisa klik tombol
-  controls.unlock();
+  // Unlock pointer agar bisa klik tombol (desktop only)
+  if (!isMobile) controls.unlock();
 }
 
 function hideInfoPanel() {
