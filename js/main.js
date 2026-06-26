@@ -32,6 +32,17 @@ camera.position.set(0, 1.7, 16); // Mulai di dekat pintu masuk
 const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
               || ('ontouchstart' in window);
 
+// Blokir zoom pinch & scroll browser di seluruh halaman saat di mobile
+if (isMobile) {
+  document.addEventListener('gesturestart',  e => e.preventDefault(), { passive: false });
+  document.addEventListener('gesturechange', e => e.preventDefault(), { passive: false });
+  document.addEventListener('gestureend',    e => e.preventDefault(), { passive: false });
+  // Blokir touchmove multi-finger di body (pinch zoom)
+  document.addEventListener('touchmove', e => {
+    if (e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
+}
+
 const controls = new THREE.PointerLockControls(camera, renderer.domElement);
 // Di mobile, jangan connect pointer lock sama sekali agar browser tidak memblokir
 if (isMobile) controls.disconnect();
